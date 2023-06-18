@@ -51,7 +51,10 @@ export default function WaiverForm() {
   let initial2SigPag = {} as any;
 
   const requiredInputClass = (input: string) =>
-    getValues(input) === '' || errors?.[input] ? 'border-b-red-500' : '';
+    // @ts-expect-error
+    getValues(input) === '' || (errors?.[input] as any)
+      ? 'border-b-red-500'
+      : '';
 
   return (
     <form onSubmit={handleSubmit((data) => console.log(data))}>
