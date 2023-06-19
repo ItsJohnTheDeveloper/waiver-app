@@ -11,10 +11,15 @@ datasource db {
   relationMode = "prisma"
 }
 
-model Star {
+
+model submission {
   id              Int       @default(autoincrement()) @id
   createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
-  name            String    @db.VarChar(255)
-  constellation   String    @db.VarChar(255)
+  dateOfAppt      DateTime
+  firstLastName   String    @db.VarChar(255)
+  email           String    @db.VarChar(255)
+  phone           String    @db.VarChar(255)
+  dob             DateTime
+  tattooLocation  String    @db.VarChar(255)
+  signatureDate   DateTime
 }

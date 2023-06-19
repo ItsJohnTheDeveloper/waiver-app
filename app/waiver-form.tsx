@@ -1,20 +1,16 @@
 'use client';
 
-import React, { useRef } from 'react';
-import {
-  Bold,
-  Text,
-  TextInput,
-  Select,
-  SearchSelectItem,
-  SelectItem,
-  Button
-} from '@tremor/react';
+import React from 'react';
+import { Bold, Text, TextInput, Button } from '@tremor/react';
 import SignatureCanvas from 'react-signature-canvas';
 
 import Image from 'next/image';
-import { useForm } from 'react-hook-form';
+import { Controller, useForm } from 'react-hook-form';
 import { termsAndConditionsList } from './misc/waiver';
+import DatePicker from 'react-date-picker';
+import 'react-date-picker/dist/DatePicker.css';
+import 'react-calendar/dist/Calendar.css';
+import axios from 'axios';
 
 const InputLabel = ({ children }: { children: React.ReactNode }) => (
   <Text className="mt-5 mb-2 text-black">
@@ -23,27 +19,32 @@ const InputLabel = ({ children }: { children: React.ReactNode }) => (
 );
 
 type FormValues = {
-  dateOfAppt: string;
-  artist: string;
+  dateOfAppt: Date | null;
   firstLastName: string;
-  dob: string;
+  dob: Date | null;
   phone: string;
   email: string;
   tattooLocation: string;
-  signatureDate: string;
+  signatureDate: Date | null;
 };
 
 export default function WaiverForm() {
   const {
+    control,
     register,
     handleSubmit,
-    control,
     formState: { errors },
     getValues
   } = useForm<FormValues>({
     mode: 'all',
     defaultValues: {
-      dateOfAppt: ''
+      dateOfAppt: null,
+      firstLastName: '',
+      dob: null,
+      phone: '',
+      email: '',
+      tattooLocation: '',
+      signatureDate: null
     }
   });
 
@@ -56,8 +57,21 @@ export default function WaiverForm() {
       ? 'border-b-red-500'
       : '';
 
+  const onCustomSubmit = async (data: FormValues) => {
+    try {
+      await axios.post('/api/submissions', {
+        ...data,
+        dateOfAppt: data.dateOfAppt?.toISOString(),
+        dob: data.dob?.toISOString(),
+        signatureDate: data.signatureDate?.toISOString()
+      });
+    } catch (e) {
+      console.log(e);
+    }
+  };
+
   return (
-    <form onSubmit={handleSubmit((data) => console.log(data))}>
+    <form onSubmit={handleSubmit(onCustomSubmit)}>
       <div className="shadow-xl max-w-3xl m-auto py-14 px-4 md:px-14">
         <div className="flex justify-center">
           <Image
@@ -68,32 +82,19 @@ export default function WaiverForm() {
           />
         </div>
         <div className="text-center my-4">
-          <p className="text-xl pt-4">Royal Rose Tattoo Inc.</p>
-          <p className="text-base my-2 text-sm">618A 12TH ST.</p>
-          <p className="text-base my-2 text-sm">New Westminster, BC</p>
-          <p className="text-base my-2 text-sm">&</p>
-          <p className="text-base my-2 text-sm">2580 Burrard St.</p>
-          <p className="text-base my-2 text-sm">Vancouver, BC</p>
+          <p className="text-xl pt-4">@joytattoo.van</p>
+          <p className="text-base my-2 text-sm">4688 Kingsway #603.</p>
+          <p className="text-base my-2 text-sm">Burnaby, BC</p>
         </div>
         <InputLabel>
           Date of Appointment <Bold className="text-red-500">*</Bold>{' '}
           (MM/DD/YYYY)
         </InputLabel>
-        <TextInput
-          {...register('dateOfAppt', { required: true })}
-          placeholder={'date'}
-          className={requiredInputClass('dateOfAppt')}
+        <Controller
+          control={control}
+          name="dateOfAppt"
+          render={({ field: { ...rest } }) => <DatePicker {...rest} />}
         />
-        <InputLabel>
-          Who is Your Artist Today? <Bold className="text-red-500">*</Bold>
-        </InputLabel>
-        <Select
-          {...register('artist', { required: true })}
-          className={requiredInputClass('artist')}
-        >
-          <SelectItem value="1">Artist 1</SelectItem>
-          <SelectItem value="2">Artist 1</SelectItem>
-        </Select>
         <div className="text-center my-5">
           <p className="text-base my-4 text-sm">
             ​PLEASE CAREFULLY READ AND BE CERTAIN YOU UNDERSTAND THE
@@ -114,16 +115,16 @@ export default function WaiverForm() {
           </InputLabel>
           <TextInput
             {...register('firstLastName', { required: true })}
-            placeholder={'firstLastName'}
+            placeholder={'John Doe'}
             className={requiredInputClass('firstLastName')}
           />
           <InputLabel>
             Date of Birth: <Bold className="text-red-500">*</Bold> (MM/DD/YYYY)
           </InputLabel>
-          <TextInput
-            {...register('dob', { required: true })}
-            placeholder={'dob'}
-            className={requiredInputClass('dob')}
+          <Controller
+            control={control}
+            name="dob"
+            render={({ field: { ...rest } }) => <DatePicker {...rest} />}
           />
         </div>
         <InputLabel>
@@ -131,13 +132,13 @@ export default function WaiverForm() {
         </InputLabel>
         <TextInput
           {...register('phone', { required: true })}
-          placeholder={'phone'}
+          placeholder={'604-123-4567'}
           className={requiredInputClass('phone')}
         />
         <InputLabel>Enter Email to recieve a copy of your waiver:</InputLabel>
-        <TextInput {...register('email')} placeholder={'email'} />
+        <TextInput {...register('email')} placeholder={'joe@gmail.com'} />
         <p className="text-center mt-6  mb-10 text-base my-4 text-sm">
-          PLEASE INITIAL THE FOLLOWING ONCE YOU HAVE COMPLETELY READ AND AGREED:
+          PLEASE ADD YOUR INITIAL ONCE YOU HAVE COMPLETELY READ AND AGREED:
         </p>
         <ul className="list-disc">
           {termsAndConditionsList.map((item) => {
@@ -152,7 +153,7 @@ export default function WaiverForm() {
           })}
         </ul>
         <InputLabel>
-          I agree ... <Bold className="text-red-500">*</Bold> (Initials)
+          I agree ... <Bold className="text-red-500">*</Bold> (Initial)
         </InputLabel>
         <SignatureCanvas
           penColor="black"
@@ -176,7 +177,7 @@ export default function WaiverForm() {
         </InputLabel>
         <TextInput
           {...register('tattooLocation', { required: true })}
-          placeholder={'tattooLocation'}
+          placeholder={'Left arm'}
           className={requiredInputClass('tattooLocation')}
         />
         <div className="flex flex-row my-8">
@@ -217,11 +218,7 @@ export default function WaiverForm() {
         <div className="w-full">
           <SignatureCanvas
             penColor="black"
-            canvasProps={{
-              width: 600,
-              height: 250,
-              className: 'bg-neutral-100 w-full'
-            }}
+            canvasProps={{ className: 'bg-neutral-100 w-full' }}
             ref={(ref) => (initial2SigPag = ref)}
           />
           <Button
@@ -239,10 +236,10 @@ export default function WaiverForm() {
         <InputLabel>
           Signature Date: <Bold className="text-red-500">*</Bold> (MM/DD/YYYY)
         </InputLabel>
-        <TextInput
-          {...register('signatureDate', { required: true })}
-          placeholder={'signatureDate'}
-          className={requiredInputClass('signatureDate')}
+        <Controller
+          control={control}
+          name="signatureDate"
+          render={({ field: { ...rest } }) => <DatePicker {...rest} />}
         />
       </div>
       <div className="flex justify-center">

@@ -75,3 +75,9 @@ pnpm dev
 ```
 
 You should now be able to access the application at http://localhost:3000.
+
+## Push Prisma schema to PlanetScale
+
+```
+npx prisma db push
+```
