@@ -1,6 +1,8 @@
 import { Title } from '@tremor/react';
-import WaiverForm from './waiver-form';
 import Head from 'next/head';
+import dynamic from 'next/dynamic';
+
+const WaiverForm = dynamic(() => import('./waiver-form'), { ssr: false });
 
 export default async function IndexPage({
   searchParams
