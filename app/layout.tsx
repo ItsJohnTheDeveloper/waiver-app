@@ -2,6 +2,7 @@ import './globals.css';
 
 import { Suspense } from 'react';
 import Navbar from './navbar';
+import { getServerSession } from 'next-auth/next';
 
 export const metadata = {
   title: 'React - Waiver App',
@@ -14,11 +15,13 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const session = await getServerSession();
+
   return (
     <html lang="en" className="h-full bg-gray-50">
       <body className="h-full">
         <Suspense>
-          <Navbar user={null} />
+          <Navbar user={session?.user} />
         </Suspense>
         {children}
       </body>

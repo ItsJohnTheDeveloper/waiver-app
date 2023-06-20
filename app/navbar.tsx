@@ -20,6 +20,10 @@ function classNames(...classes: string[]) {
 export default function Navbar({ user = null }: { user: any | null }) {
   const pathname = usePathname();
 
+  if (!user) {
+    delete navigation[1];
+  }
+
   return (
     <Disclosure as="nav" className="bg-white shadow-sm">
       {({ open }) => (

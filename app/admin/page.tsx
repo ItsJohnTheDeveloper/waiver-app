@@ -29,11 +29,20 @@ const downloadCSVFile = async () => {
 };
 
 export default function PlaygroundPage() {
-  const { data, isLoading } = useSWR('/api/submissions', fetcher);
+  const { data, isLoading, error } = useSWR('/api/submissions', fetcher);
+  const unauthorized = error?.response?.status === 401;
+
+  if (unauthorized) {
+    return (
+      <main className="p-4 md:p-10 mx-auto max-w-7xl">
+        <Title>{error?.response?.data?.error}</Title>
+      </main>
+    );
+  }
 
   return (
     <main className="p-4 md:p-10 mx-auto max-w-7xl">
-      <Title>Users</Title>
+      <Title>Users [BETA]</Title>
       <Text>
         Search for an individual waiver by name, email, or phone number.
       </Text>
