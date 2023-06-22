@@ -81,3 +81,9 @@ You should now be able to access the application at http://localhost:3000.
 ```
 npx prisma db push
 ```
+
+## SSH into PlanetScale
+
+```
+pscale connect waiver_archive initial-setup --port 3309
+```

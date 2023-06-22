@@ -28,7 +28,7 @@ export default async function handler(
 
     case 'POST':
       try {
-        const body = JSON.parse(req.body);
+        const { body } = req;
         const result = await prisma.submission.create({
           data: {
             dateOfAppt: body.dateOfAppt,
@@ -37,7 +37,8 @@ export default async function handler(
             phone: body.phone,
             dob: body.dob,
             tattooLocation: body.tattooLocation,
-            signatureDate: body.signatureDate
+            signatureDate: body.signatureDate,
+            waiverDownloadUrl: body.waiverDownloadUrl
           }
         });
         res.status(200).json(result);

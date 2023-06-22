@@ -1,6 +1,7 @@
 import { getSession } from 'next-auth/react';
 import prisma from '../../../lib/prisma';
 import { NextApiRequest, NextApiResponse } from 'next';
+import { submission } from '@prisma/client';
 
 const submissionFields = {
   id: 'ID',
@@ -11,20 +12,9 @@ const submissionFields = {
   phone: 'Phone',
   dob: 'Date of Birth',
   tattooLocation: 'Tattoo Location',
-  signatureDate: 'Date Signed'
+  signatureDate: 'Date Signed',
+  waiverDownloadUrl: 'Waiver Download URL'
 };
-
-interface Submission {
-  id: number;
-  createdAt: Date;
-  dateOfAppt: Date;
-  firstLastName: string;
-  email: string;
-  phone: string;
-  dob: Date;
-  tattooLocation: string;
-  signatureDate: Date;
-}
 
 export default async function handler(
   req: NextApiRequest,
@@ -46,14 +36,14 @@ export default async function handler(
         const headers = Object.values(submissionFields);
         const csv = [headers.join(',')];
 
-        submissions.forEach((submission: Submission) => {
+        submissions.forEach((submission: submission) => {
           const row = Object.keys(submissionFields).map((fieldName) => {
-            if (typeof submission[fieldName as keyof Submission] === 'object') {
-              return new Date(submission[fieldName as keyof Submission])
+            if (typeof submission[fieldName as keyof submission] === 'object') {
+              return new Date(submission[fieldName as keyof submission])
                 .toISOString()
                 .slice(0, 10);
             }
-            return submission[fieldName as keyof Submission];
+            return submission[fieldName as keyof submission];
           });
           csv.push(row.join(','));
         });

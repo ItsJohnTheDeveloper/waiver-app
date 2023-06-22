@@ -22,4 +22,5 @@ model submission {
   dob             DateTime
   tattooLocation  String    @db.VarChar(255)
   signatureDate   DateTime
+  waiverDownloadUrl String  @db.VarChar(255)
 }
