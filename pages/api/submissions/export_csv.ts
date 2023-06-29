@@ -37,8 +37,7 @@ export default async function handler(
         const session = await getSession({ req });
         const authorizedEmails = process.env.AUTHORIZED_EMAIL?.split(',');
         if (authorizedEmails?.indexOf(session?.user?.email ?? '') === -1) {
-          res.status(401).json({ error: 'Not authenticated' });
-          return;
+          return res.status(401).json({ error: 'Not authenticated' });
         }
 
         const submissions = await prisma.submission.findMany();
@@ -77,15 +76,13 @@ export default async function handler(
         csv.push(...results);
 
         res.setHeader('Content-Type', 'text/csv');
-        res.status(200).send(csv.join('\n'));
+        return res.status(200).send(csv.join('\n'));
       } catch (e) {
         console.error(e);
-        res.status(500).json({ error: 'Unable to GET submissions' });
+        return res.status(500).json({ error: 'Unable to GET submissions' });
       }
-      break;
     default:
       res.setHeader('Allow', ['GET']);
-      res.status(405).end(`Method ${method} Not Allowed`);
-      break;
+      return res.status(405).end(`Method ${method} Not Allowed`);
   }
 }

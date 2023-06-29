@@ -15,15 +15,14 @@ export default async function handler(
         const session = await getSession({ req });
         const authorizedEmails = process.env.AUTHORIZED_EMAIL?.split(',');
         if (authorizedEmails?.indexOf(session?.user?.email ?? '') === -1) {
-          res.status(401).json({ error: 'Not authenticated' });
-          return;
+          return res.status(401).json({ error: 'Not authenticated' });
         }
 
         const submissions = await prisma.submission.findMany();
-        res.status(200).json(submissions);
+        return res.status(200).json(submissions);
       } catch (e) {
         console.error(e);
-        res.status(500).json({ error: 'Unable to GET submissions' });
+        return res.status(500).json({ error: 'Unable to GET submissions' });
       }
       break;
 
@@ -42,14 +41,13 @@ export default async function handler(
             waiverDownloadUrl: body.waiverDownloadUrl
           }
         });
-        res.status(200).json(result);
+        return res.status(201).json(result);
       } catch (e) {
         console.error(e);
-        res.status(500).json({ error: 'Unable to POST submission' });
+        return res.status(500).json({ error: 'Unable to POST submission' });
       }
     default:
       res.setHeader('Allow', ['GET', 'POST']);
-      res.status(405).end(`Method ${method} Not Allowed`);
-      break;
+      return res.status(405).end(`Method ${method} Not Allowed`);
   }
 }
