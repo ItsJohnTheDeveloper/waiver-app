@@ -162,16 +162,6 @@ export default function WaiverForm() {
     primarySignatureSigPag.clear();
   };
 
-  // Zoom into any inputs with errors
-  if (errors?.dateOfAppt) {
-    document
-      .getElementById('dateOfAppt')
-      ?.scrollIntoView({ behavior: 'smooth' });
-  }
-  if (errors?.dob) {
-    document.getElementById('dob')?.scrollIntoView({ behavior: 'smooth' });
-  }
-
   return (
     <>
       <SuccessToast show={showSuccessToast} />
