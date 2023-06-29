@@ -2,6 +2,14 @@ import { getSession } from 'next-auth/react';
 import prisma from '../../../lib/prisma';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { submission } from '@prisma/client';
+import S3 from 'aws-sdk/clients/s3';
+
+const s3 = new S3({
+  region: 'us-west-2',
+  accessKeyId: process.env.AWS_S3_ACCESS_KEY,
+  secretAccessKey: process.env.AWS_S3_SECRET_KEY,
+  signatureVersion: 'v4'
+});
 
 const submissionFields = {
   id: 'ID',
@@ -27,7 +35,8 @@ export default async function handler(
       try {
         // Check if user is authorized and is admin
         const session = await getSession({ req });
-        if (session?.user?.email !== process.env.AUTHORIZED_EMAIL) {
+        const authorizedEmails = process.env.AUTHORIZED_EMAIL?.split(',');
+        if (authorizedEmails?.indexOf(session?.user?.email ?? '') === -1) {
           res.status(401).json({ error: 'Not authenticated' });
           return;
         }
@@ -36,17 +45,36 @@ export default async function handler(
         const headers = Object.values(submissionFields);
         const csv = [headers.join(',')];
 
-        submissions.forEach((submission: submission) => {
-          const row = Object.keys(submissionFields).map((fieldName) => {
-            if (typeof submission[fieldName as keyof submission] === 'object') {
-              return new Date(submission[fieldName as keyof submission])
-                .toISOString()
-                .slice(0, 10);
-            }
-            return submission[fieldName as keyof submission];
-          });
-          csv.push(row.join(','));
+        const promises = submissions.map(async (submission) => {
+          const row = await Promise.all(
+            Object.keys(submissionFields).map(async (fieldName) => {
+              if (fieldName === 'waiverDownloadUrl') {
+                const fileParams = {
+                  Bucket: process.env.AWS_S3_BUCKET_NAME,
+                  Key: submission.waiverDownloadUrl
+                    .split('waiver-app.s3.us-west-2.amazonaws.com/')[1]
+                    .replaceAll(/%3A/g, ':'),
+                  Expires: 604800 // 7 days
+                };
+                return await s3.getSignedUrlPromise('getObject', fileParams);
+              }
+
+              if (
+                typeof submission[fieldName as keyof submission] === 'object'
+              ) {
+                return new Date(submission[fieldName as keyof submission])
+                  .toISOString()
+                  .slice(0, 10);
+              }
+              return submission[fieldName as keyof submission];
+            })
+          );
+
+          return row.join(',');
         });
+
+        const results = await Promise.all(promises);
+        csv.push(...results);
 
         res.setHeader('Content-Type', 'text/csv');
         res.status(200).send(csv.join('\n'));

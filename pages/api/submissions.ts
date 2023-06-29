@@ -13,7 +13,8 @@ export default async function handler(
       try {
         // Check if user is authorized and is admin
         const session = await getSession({ req });
-        if (session?.user?.email !== process.env.AUTHORIZED_EMAIL) {
+        const authorizedEmails = process.env.AUTHORIZED_EMAIL?.split(',');
+        if (authorizedEmails?.indexOf(session?.user?.email ?? '') === -1) {
           res.status(401).json({ error: 'Not authenticated' });
           return;
         }
