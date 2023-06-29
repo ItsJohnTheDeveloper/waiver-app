@@ -162,6 +162,16 @@ export default function WaiverForm() {
     primarySignatureSigPag.clear();
   };
 
+  // Zoom into any inputs with errors
+  if (errors?.dateOfAppt) {
+    document
+      .getElementById('dateOfAppt')
+      ?.scrollIntoView({ behavior: 'smooth' });
+  }
+  if (errors?.dob) {
+    document.getElementById('dob')?.scrollIntoView({ behavior: 'smooth' });
+  }
+
   return (
     <>
       <SuccessToast show={showSuccessToast} />
@@ -185,7 +195,7 @@ export default function WaiverForm() {
           </div>
           <InputLabel>
             Date of Appointment{' '}
-            <Bold className="text-red-500">
+            <Bold className="text-red-500" id="dateOfAppt">
               * {errors?.dateOfAppt && ' Required '}
             </Bold>{' '}
             (MM/DD/YYYY)
@@ -225,7 +235,7 @@ export default function WaiverForm() {
             />
             <InputLabel>
               Date of Birth:{' '}
-              <Bold className="text-red-500">
+              <Bold className="text-red-500" id="dob">
                 * {errors?.dob && ' Required '}
               </Bold>{' '}
               (MM/DD/YYYY)
@@ -372,6 +382,7 @@ export default function WaiverForm() {
             className="mt-8 "
             style={{ maxWidth: 400, width: '100%', borderRadius: 30 }}
             type="submit"
+            loading={formBeingSubmitted}
           >
             Submit
           </Button>
