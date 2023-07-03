@@ -58,13 +58,13 @@ export default function WaiverForm() {
   } = useForm<FormValues>({
     mode: 'all',
     defaultValues: {
-      dateOfAppt: null,
+      dateOfAppt: new Date(),
       firstLastName: '',
       dob: null,
       phone: '',
       email: '',
       tattooLocation: '',
-      signatureDate: null
+      signatureDate: new Date()
     }
   });
   const [showSuccessToast, setShowSuccessToast] = useState(false);
@@ -170,14 +170,6 @@ export default function WaiverForm() {
           className="shadow-xl max-w-3xl m-auto py-14 px-4 md:px-14"
           ref={waiverRef}
         >
-          <div className="flex justify-center">
-            <Image
-              alt="waiver-logo"
-              src={'/waiver-logo.jpg'}
-              height={100}
-              width={100}
-            />
-          </div>
           <div className="text-center my-4">
             <p className="text-xl pt-4">@joytattoo.van</p>
             <p className="text-base my-2 text-sm">4688 Kingsway #603.</p>
