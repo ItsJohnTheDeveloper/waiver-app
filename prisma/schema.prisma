@@ -24,3 +24,8 @@ model submission {
   signatureDate   DateTime
   waiverDownloadUrl String  @db.VarChar(255)
 }
+
+model lifesupport {
+  id              Int       @default(autoincrement()) @id
+  updatedAt       DateTime  @default(now())
+}
