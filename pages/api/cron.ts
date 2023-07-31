@@ -5,10 +5,12 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
+  const today = new Date();
+
   try {
     await prisma.lifesupport.update({
       where: { id: 1 },
-      data: { updatedAt: new Date() }
+      data: { updatedAt: today }
     });
     return res.status(200).json({ message: '(CRON) success' });
   } catch (err) {
