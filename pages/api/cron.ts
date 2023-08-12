@@ -12,7 +12,9 @@ export default async function handler(
       where: { id: 1 },
       data: { updatedAt: today }
     });
-    return res.status(200).json({ message: '(CRON) success' });
+
+    const data = await prisma.lifesupport.findUnique({ where: { id: 1 } });
+    return res.status(200).json({ message: `(CRON) success ${data}` });
   } catch (err) {
     return res.status(500).json({ message: '(CRON) error has occurred' });
   }
