@@ -21,7 +21,6 @@ const InputLabel = ({ children }: { children: React.ReactNode }) => (
     <Bold>{children}</Bold>
   </Text>
 );
-
 const SuccessToast = ({ show }: { show: boolean }) => {
   if (!show) return null;
   return (
@@ -69,6 +68,7 @@ export default function WaiverForm() {
   });
   const [showSuccessToast, setShowSuccessToast] = useState(false);
 
+  const dobRef = useRef(null);
   const waiverRef = useRef(null);
   const [base64Image, takeScreenshot] = useScreenshot();
   const [formBeingSubmitted, setFormBeingSubmitted] = useState(false);
@@ -217,7 +217,7 @@ export default function WaiverForm() {
             />
             <InputLabel>
               Date of Birth:{' '}
-              <Bold className="text-red-500" id="dob">
+              <Bold className="text-red-500" id="dob" ref={dobRef}>
                 * {errors?.dob && ' Required '}
               </Bold>{' '}
               (MM/DD/YYYY)
@@ -226,7 +226,13 @@ export default function WaiverForm() {
               control={control}
               name="dob"
               rules={{ required: true }}
-              render={({ field: { ...rest } }) => <DatePicker {...rest} />}
+              render={({ field, fieldState }) => {
+                if (fieldState.invalid) {
+                  // @ts-ignore
+                  dobRef?.current?.scrollIntoView();
+                }
+                return <DatePicker {...field} />;
+              }}
             />
           </div>
           <InputLabel>
@@ -240,7 +246,7 @@ export default function WaiverForm() {
             placeholder={'604-123-4567'}
             className={requiredInputClass('phone')}
           />
-          <InputLabel>Enter Email to recieve a copy of your waiver:</InputLabel>
+          <InputLabel>Email address:</InputLabel>
           <TextInput {...register('email')} placeholder={'joe@gmail.com'} />
           <p className="text-center mt-6  mb-10 text-base my-4 text-sm">
             PLEASE ADD YOUR INITIAL ONCE YOU HAVE COMPLETELY READ AND AGREED:
