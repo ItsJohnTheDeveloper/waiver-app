@@ -22,7 +22,7 @@ export const termsAndConditionsList = [
   },
   {
     id: 6,
-    text: 'I agree and acknowledge it is not reasonably possible for the representatives and employees of Royal Rose Tattoo inc. to determine whether I may have an allergic reaction to pigments or processes used in my tattoo, and I agree to accept the risk that such is possible.'
+    text: 'I agree and acknowledge it is not reasonably possible for the representatives and employees of Joy Tattoo. to determine whether I may have an allergic reaction to pigments or processes used in my tattoo, and I agree to accept the risk that such is possible.'
   },
   {
     id: 7,
@@ -42,15 +42,15 @@ export const termsAndConditionsList = [
   },
   {
     id: 11,
-    text: 'I acknowledge I am over the age of eighteen and that I have truthfully represented to my tattooist that the obtaining of a tattoo is by my choice alone. I consent to the application of the tattoo and to any actions or conduct of the representatives and employees or Royal Rose Tattoo inc. reasonably necessary to perform the tattoo procedure.'
+    text: 'I acknowledge I am over the age of eighteen and that I have truthfully represented to my tattooist that the obtaining of a tattoo is by my choice alone. I consent to the application of the tattoo and to any actions or conduct of the representatives and employees or Joy Tattoo. reasonably necessary to perform the tattoo procedure.'
   },
   {
     id: 12,
-    text: 'I acknowledge that Royal Rose Tattoo inc. reserves all rights to use any photos of my tattoo taken during my appointment.'
+    text: 'I acknowledge that Joy Tattoo. reserves all rights to use any photos of my tattoo taken during my appointment.'
   },
   {
     id: 13,
-    text: 'I acknowledge that the tattoo may take two weeks or longer to heal. I hereby release and forever discharge and hold harmless Royal Rose Tattoo inc., the tattooist and all Affiliates, Owners, Managers and Employees from any and all claims, images or legal actions arising from or connected in any way with my tattoo, or the procedure and conduct used in performing my tattoo, to the fullest extent allowed by the law.'
+    text: 'I acknowledge that the tattoo may take two weeks or longer to heal. I hereby release and forever discharge and hold harmless Joy Tattoo, the tattooist and all Affiliates, Owners, Managers and Employees from any and all claims, images or legal actions arising from or connected in any way with my tattoo, or the procedure and conduct used in performing my tattoo, to the fullest extent allowed by the law.'
   },
   {
     id: 14,
