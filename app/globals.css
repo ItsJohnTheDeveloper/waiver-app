@@ -6,3 +6,16 @@
 }
 @tailwind components;
 @tailwind utilities;
+
+/* Really stupid workaround in order for the date picker value to not be hidden during screenshot */
+.react-date-picker__inputGroup__month {
+  min-width: 36px !important;
+}
+
+.react-date-picker__inputGroup__day {
+  min-width: 36px !important;
+}
+
+.react-date-picker__inputGroup__year {
+  min-width: 50px !important;
+}

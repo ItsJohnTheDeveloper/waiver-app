@@ -3,7 +3,6 @@
 import { Bold, Button, Text, Title } from '@tremor/react';
 import useSWR from 'swr';
 import fetcher from '../../helpers/fetcher';
-import Search from '../search';
 import fileDownload from 'js-file-download';
 import axios from 'axios';
 
@@ -24,7 +23,7 @@ const downloadCSVFile = async () => {
 
     fileDownload(response.data, filename);
   } catch (err) {
-    console.log(err);
+    console.error(err);
   }
 };
 
@@ -42,12 +41,6 @@ export default function PlaygroundPage() {
 
   return (
     <main className="p-4 md:p-10 mx-auto max-w-7xl">
-      <Title>Users [BETA]</Title>
-      <Text>
-        Search for an individual waiver by name, email, or phone number.
-      </Text>
-      <Search />
-
       <Title className="mt-10">Export</Title>
       {isLoading ? (
         <Text>...loading</Text>

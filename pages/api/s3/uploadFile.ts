@@ -1,6 +1,9 @@
 import S3 from 'aws-sdk/clients/s3';
 import { NextApiRequest, NextApiResponse } from 'next';
 
+const S3_DISABLED =
+  process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'test';
+
 const s3 = new S3({
   region: 'us-west-2',
   accessKeyId: process.env.AWS_S3_ACCESS_KEY,
@@ -13,6 +16,11 @@ export default async function createFile(
   res: NextApiResponse
 ) {
   let { name, type } = req.body;
+
+  // if in dev, skip adding to S3.
+  if (S3_DISABLED) {
+    return res.status(200).json({ url: 'http://localhost:3000' });
+  }
 
   if (!name || !type) {
     return res.status(400).json({ message: 'Missing required fields' });

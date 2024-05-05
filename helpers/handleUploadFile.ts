@@ -22,7 +22,7 @@ export const handleUploadWaiverPicture = async (
     const imageUrl = /[^?]*/g.exec(downloadURL)?.[0]; // regex to cleanse url, getting it without query strings)
     callback(imageUrl);
   } catch (err) {
-    console.log(err);
+    console.error(err);
     throw err;
   }
 };

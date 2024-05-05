@@ -1,20 +1,20 @@
 'use client';
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useRef, useState } from 'react';
+import axios from 'axios';
 import { Bold, Text, TextInput, Button, Callout } from '@tremor/react';
-import SignatureCanvas from 'react-signature-canvas';
-//@ts-expect-error
-import { useScreenshot } from 'use-react-screenshot';
-
-import Image from 'next/image';
 import { Controller, useForm } from 'react-hook-form';
-import { termsAndConditionsList } from './misc/waiver';
+import ReactSignatureCanvas from 'react-signature-canvas';
+import SignatureCanvas from 'react-signature-canvas';
+import { toBlob } from 'html-to-image';
+
 import DatePicker from 'react-date-picker';
 import 'react-date-picker/dist/DatePicker.css';
 import 'react-calendar/dist/Calendar.css';
-import axios from 'axios';
 import { CheckCircleIcon } from '@heroicons/react/24/solid';
-import { handleUploadWaiverPicture } from '../helpers/handleUploadFile';
+
+import { termsAndConditionsList } from '../misc/terms-and-conditions';
+import { handleUploadWaiverPicture } from '../../helpers/handleUploadFile';
 
 const InputLabel = ({ children }: { children: React.ReactNode }) => (
   <Text className="mt-5 mb-2 text-black">
@@ -70,12 +70,13 @@ export default function WaiverForm() {
 
   const dobRef = useRef(null);
   const waiverRef = useRef(null);
-  const [base64Image, takeScreenshot] = useScreenshot();
+
   const [formBeingSubmitted, setFormBeingSubmitted] = useState(false);
 
-  let initial1SigPag = {} as any;
-  let initial2SigPag = {} as any;
-  let primarySignatureSigPag = {} as any;
+  const [initial1SigPad, setInitial1SigPad] = useState<ReactSignatureCanvas>();
+  const [initial2SigPad, setInitial2SigPad] = useState<ReactSignatureCanvas>();
+  const [primarySignatureSigPad, setPrimarySignatureSigPad] =
+    useState<ReactSignatureCanvas>();
 
   const requiredInputClass = (input: string) =>
     // @ts-expect-error
@@ -85,9 +86,9 @@ export default function WaiverForm() {
 
   const prepareDocumentSave = async () => {
     if (
-      initial1SigPag?.isEmpty() ||
-      initial2SigPag?.isEmpty() ||
-      primarySignatureSigPag?.isEmpty()
+      initial1SigPad?.isEmpty() ||
+      initial2SigPad?.isEmpty() ||
+      primarySignatureSigPad?.isEmpty()
     ) {
       alert('Please sign all required fields.');
       return;
@@ -95,25 +96,21 @@ export default function WaiverForm() {
     setFormBeingSubmitted(true);
 
     // prep the forms html for screenshot
-    (waiverRef?.current as any).classList.remove('shadow-xl');
-    takeScreenshot(waiverRef.current);
-    (waiverRef?.current as any).classList.add('shadow-xl');
+    if (waiverRef?.current) {
+      toBlob(waiverRef.current).then(function (blob) {
+        if (!blob) return;
+        handleUploadWaiverImage(blob, getValues());
+      });
+    }
   };
 
-  useEffect(() => {
-    if (base64Image && formBeingSubmitted) {
-      handleUploadWaiverImage(getValues());
-    }
-  }, [base64Image, formBeingSubmitted]);
-
-  const handleUploadWaiverImage = async (data: FormValues) => {
-    const buffer = Buffer.from(base64Image.split(',')[1], 'base64');
+  const handleUploadWaiverImage = async (blob: Blob, data: FormValues) => {
     const filename = `${data.firstLastName.replaceAll(
       ' ',
       '_'
     )}-waiver-${new Date().toISOString()}.jpg`;
 
-    const file = new File([buffer], filename, { type: 'image/jpg' });
+    const file = new File([blob], filename, { type: 'image/jpg' });
 
     try {
       await handleUploadWaiverPicture(
@@ -124,7 +121,7 @@ export default function WaiverForm() {
         }
       );
     } catch (e) {
-      console.log(e);
+      console.error(e);
     }
   };
 
@@ -143,31 +140,34 @@ export default function WaiverForm() {
       });
 
       setShowSuccessToast(true);
-      handleResetForm();
+      reset(); // reset form values and clear signature pads
+      initial1SigPad?.clear();
+      initial2SigPad?.clear();
+      primarySignatureSigPad?.clear();
+      window.scroll({
+        top: 0,
+        left: 0,
+        behavior: 'smooth'
+      });
 
+      setFormBeingSubmitted(false);
       setTimeout(() => {
         setShowSuccessToast(false);
       }, 5000);
     } catch (e) {
-      console.log(e);
-    } finally {
-      setFormBeingSubmitted(false);
+      console.error({ error: e });
     }
-  };
-
-  const handleResetForm = () => {
-    reset(); // reset form values after successful submission
-    initial1SigPag.clear();
-    initial2SigPag.clear();
-    primarySignatureSigPag.clear();
   };
 
   return (
     <>
       <SuccessToast show={showSuccessToast} />
-      <form onSubmit={handleSubmit(prepareDocumentSave)}>
+      <form
+        onSubmit={handleSubmit(prepareDocumentSave)}
+        className="flex flex-col"
+      >
         <div
-          className="shadow-xl max-w-3xl m-auto py-14 px-4 md:px-14"
+          className="shadow-xl max-w-3xl py-14 px-4 md:px-14 self-center bg-gray-50"
           ref={waiverRef}
         >
           <div className="text-center my-4">
@@ -273,7 +273,7 @@ export default function WaiverForm() {
               height: 100,
               className: 'bg-yellow-200	'
             }}
-            ref={(ref) => (initial1SigPag = ref)}
+            ref={(ref) => ref && setInitial1SigPad(ref)}
           />
           <Button
             className="mt-1"
@@ -281,7 +281,7 @@ export default function WaiverForm() {
             variant="light"
             onClick={(e) => {
               e.preventDefault();
-              initial1SigPag.clear();
+              initial1SigPad?.clear();
             }}
           >
             Clear
@@ -306,7 +306,7 @@ export default function WaiverForm() {
                   height: 100,
                   className: 'bg-yellow-200	'
                 }}
-                ref={(ref) => (initial2SigPag = ref)}
+                ref={(ref) => ref && setInitial2SigPad(ref)}
               />
               <Button
                 className="mt-1"
@@ -314,7 +314,7 @@ export default function WaiverForm() {
                 variant="light"
                 onClick={(e) => {
                   e.preventDefault();
-                  initial2SigPag.clear();
+                  initial2SigPad?.clear();
                 }}
               >
                 Clear
@@ -336,7 +336,7 @@ export default function WaiverForm() {
             <SignatureCanvas
               penColor="black"
               canvasProps={{ className: 'bg-neutral-100 w-full' }}
-              ref={(ref) => (primarySignatureSigPag = ref)}
+              ref={(ref) => ref && setPrimarySignatureSigPad(ref)}
             />
             <Button
               className="mt-1"
@@ -344,7 +344,7 @@ export default function WaiverForm() {
               variant="light"
               onClick={(e) => {
                 e.preventDefault();
-                primarySignatureSigPag.clear();
+                primarySignatureSigPad?.clear();
               }}
             >
               Clear
@@ -371,6 +371,7 @@ export default function WaiverForm() {
             style={{ maxWidth: 400, width: '100%', borderRadius: 30 }}
             type="submit"
             loading={formBeingSubmitted}
+            disabled={formBeingSubmitted}
           >
             Submit
           </Button>

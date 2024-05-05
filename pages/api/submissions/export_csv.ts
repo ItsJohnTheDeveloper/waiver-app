@@ -1,8 +1,10 @@
 import { getSession } from 'next-auth/react';
-import prisma from '../../../lib/prisma';
 import { NextApiRequest, NextApiResponse } from 'next';
-import { submission } from '@prisma/client';
 import S3 from 'aws-sdk/clients/s3';
+import { PGSubmission } from '../../../lib/types';
+import { sql } from '@vercel/postgres';
+
+const TABLE_NAME = process.env.DB_TABLE_NAME;
 
 const s3 = new S3({
   region: 'us-west-2',
@@ -13,15 +15,15 @@ const s3 = new S3({
 
 const submissionFields = {
   id: 'ID',
-  createdAt: 'Date Created',
-  dateOfAppt: 'Appt. Date',
-  firstLastName: 'FullName',
+  createdat: 'Date Created',
+  dateofappt: 'Appt. Date',
+  firstlastname: 'FullName',
   email: 'Email',
   phone: 'Phone',
   dob: 'Date of Birth',
-  tattooLocation: 'Tattoo Location',
-  signatureDate: 'Date Signed',
-  waiverDownloadUrl: 'Waiver Download URL'
+  tattoolocation: 'Tattoo Location',
+  signaturedate: 'Date Signed',
+  waiverdownloadurl: 'Waiver Download URL'
 };
 
 export default async function handler(
@@ -40,37 +42,49 @@ export default async function handler(
           return res.status(401).json({ error: 'Not authenticated' });
         }
 
-        const submissions = await prisma.submission.findMany();
+        const query = `SELECT * FROM ${TABLE_NAME};`;
+
+        const { rows: submissions } = await sql.query(query);
         const headers = Object.values(submissionFields);
         const csv = [headers.join(',')];
 
-        const promises = submissions.map(async (submission) => {
-          const row = await Promise.all(
-            Object.keys(submissionFields).map(async (fieldName) => {
-              if (fieldName === 'waiverDownloadUrl') {
-                const fileParams = {
-                  Bucket: process.env.AWS_S3_BUCKET_NAME,
-                  Key: submission.waiverDownloadUrl
-                    .split('waiver-app.s3.us-west-2.amazonaws.com/')[1]
-                    .replaceAll(/%3A/g, ':'),
-                  Expires: 604800 // 7 days
-                };
-                return await s3.getSignedUrlPromise('getObject', fileParams);
-              }
+        const promises: Promise<string>[] = submissions.map(
+          async (submission: PGSubmission) => {
+            const row = await Promise.all(
+              Object.keys(submissionFields).map(async (name) => {
+                const fieldName = name as keyof PGSubmission;
 
-              if (
-                typeof submission[fieldName as keyof submission] === 'object'
-              ) {
-                return new Date(submission[fieldName as keyof submission])
-                  .toISOString()
-                  .slice(0, 10);
-              }
-              return submission[fieldName as keyof submission];
-            })
-          );
+                if (
+                  fieldName === 'waiverdownloadurl' &&
+                  submission[fieldName].includes('s3')
+                ) {
+                  const fileParams = {
+                    Bucket: process.env.AWS_S3_BUCKET_NAME,
+                    Key: submission.waiverdownloadurl
+                      .split('waiver-app.s3.us-west-2.amazonaws.com/')[1]
+                      .replaceAll(/%3A/g, ':'),
+                    Expires: 604800 // 7 days
+                  };
+                  return await s3.getSignedUrlPromise('getObject', fileParams);
+                }
 
-          return row.join(',');
-        });
+                if (
+                  fieldName === 'createdat' ||
+                  fieldName === 'dateofappt' ||
+                  fieldName === 'dob' ||
+                  fieldName === 'signaturedate'
+                ) {
+                  return new Date(submission[fieldName])
+                    .toISOString()
+                    .split('T')[0];
+                }
+                return submission[fieldName as keyof PGSubmission];
+              })
+            );
+
+            return row.join(',');
+          }
+        );
 
         const results = await Promise.all(promises);
         csv.push(...results);

@@ -1,13 +1,13 @@
 import './globals.css';
 
 import { Suspense } from 'react';
-import Navbar from './navbar';
-import { getServerSession } from 'next-auth/next';
+import Navbar from './components/navbar';
+import { getServerSession } from 'next-auth';
 
 export const metadata = {
   title: 'React - Waiver App',
   description:
-    'A user admin dashboard configured with Next.js, PlanetScale, NextAuth, Tailwind CSS, TypeScript, ESLint, and Prettier.'
+    'A user admin dashboard configured with Next.js Vercel/postgres, NextAuth, Tailwind CSS, TypeScript, ESLint, and Prettier.'
 };
 
 export default async function RootLayout({

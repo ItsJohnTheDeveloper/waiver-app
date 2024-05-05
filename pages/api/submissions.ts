@@ -1,6 +1,20 @@
 import { getSession } from 'next-auth/react';
-import prisma from '../../lib/prisma';
+import { sql } from '@vercel/postgres';
 import { NextApiRequest, NextApiResponse } from 'next';
+import { Submission } from '../../lib/types';
+
+const TABLE_NAME = process.env.DB_TABLE_NAME;
+
+const normalizeSubmissionCreate = (data: Submission) => ({
+  dateOfAppt: `'${new Date(data.dateOfAppt).toISOString()}'`,
+  firstLastName: `'${data.firstLastName}'`,
+  email: `'${data?.email ?? ''}'`,
+  phone: `'${data.phone}'`,
+  dob: `'${new Date(data.dob).toISOString()}'`,
+  tattooLocation: `'${data.tattooLocation}'`,
+  signatureDate: `'${new Date(data.signatureDate).toISOString()}'`,
+  waiverDownloadUrl: `'${data.waiverDownloadUrl}'`
+});
 
 export default async function handler(
   req: NextApiRequest,
@@ -18,29 +32,19 @@ export default async function handler(
           return res.status(401).json({ error: 'Not authenticated' });
         }
 
-        const submissions = await prisma.submission.findMany();
-        return res.status(200).json(submissions);
+        const query = `SELECT * FROM ${TABLE_NAME};`;
+        const { rows: submissions } = await sql.query(query);
+        return res.status(200).json({ submissions });
       } catch (e) {
         console.error(e);
         return res.status(500).json({ error: 'Unable to GET submissions' });
       }
-      break;
-
     case 'POST':
       try {
-        const { body } = req;
-        const result = await prisma.submission.create({
-          data: {
-            dateOfAppt: body.dateOfAppt,
-            firstLastName: body.firstLastName,
-            email: body.email,
-            phone: body.phone,
-            dob: body.dob,
-            tattooLocation: body.tattooLocation,
-            signatureDate: body.signatureDate,
-            waiverDownloadUrl: body.waiverDownloadUrl
-          }
-        });
+        const data = normalizeSubmissionCreate(req.body);
+        const query = `INSERT INTO ${TABLE_NAME} (dateOfAppt, firstLastName, email, phone, dob, tattooLocation, signatureDate, waiverDownloadUrl) VALUES (${data.dateOfAppt}, ${data.firstLastName}, ${data.email}, ${data.phone}, ${data.dob}, ${data.tattooLocation}, ${data.signatureDate}, ${data.waiverDownloadUrl}) RETURNING *;`;
+        const { rows: result } = await sql.query(query);
+
         return res.status(201).json(result);
       } catch (e) {
         console.error(e);
