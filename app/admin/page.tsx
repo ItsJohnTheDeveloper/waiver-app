@@ -27,8 +27,10 @@ const downloadCSVFile = async () => {
   }
 };
 
-export default function PlaygroundPage() {
+export default function Index() {
   const { data, isLoading, error } = useSWR('/api/submissions', fetcher);
+  const submissions = data?.submissions || [];
+
   const unauthorized = error?.response?.status === 401;
 
   if (unauthorized) {
@@ -47,7 +49,7 @@ export default function PlaygroundPage() {
       ) : (
         <>
           <Text>
-            Waivers to be exported <Bold>({data?.length})</Bold>
+            Waivers to be exported <Bold>({submissions?.length})</Bold>
           </Text>
           <Button size="xl" className="mt-4" onClick={downloadCSVFile}>
             Export .csv

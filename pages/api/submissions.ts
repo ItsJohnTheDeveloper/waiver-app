@@ -1,7 +1,7 @@
-import { getSession } from 'next-auth/react';
 import { sql } from '@vercel/postgres';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { Submission } from '../../lib/types';
+import { checkIfUserIsAdmin } from './auth/utils';
 
 const TABLE_NAME = process.env.DB_TABLE_NAME;
 
@@ -26,11 +26,7 @@ export default async function handler(
     case 'GET':
       try {
         // Check if user is authorized and is admin
-        const session = await getSession({ req });
-        const authorizedEmails = process.env.AUTHORIZED_EMAIL?.split(',');
-        if (authorizedEmails?.indexOf(session?.user?.email ?? '') === -1) {
-          return res.status(401).json({ error: 'Not authenticated' });
-        }
+        checkIfUserIsAdmin(req, res);
 
         const query = `SELECT * FROM ${TABLE_NAME};`;
         const { rows: submissions } = await sql.query(query);

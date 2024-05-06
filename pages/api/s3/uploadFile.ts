@@ -1,5 +1,6 @@
 import S3 from 'aws-sdk/clients/s3';
 import { NextApiRequest, NextApiResponse } from 'next';
+import { checkIfUserIsAdmin } from '../auth/utils';
 
 const S3_DISABLED =
   process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'test';
@@ -16,6 +17,8 @@ export default async function createFile(
   res: NextApiResponse
 ) {
   let { name, type } = req.body;
+
+  checkIfUserIsAdmin(req, res);
 
   // if in dev, skip adding to S3.
   if (S3_DISABLED) {
