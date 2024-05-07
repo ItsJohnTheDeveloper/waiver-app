@@ -4,9 +4,8 @@ import React, { useRef, useState } from 'react';
 import axios from 'axios';
 import { Bold, Text, TextInput, Button, Callout } from '@tremor/react';
 import { Controller, useForm } from 'react-hook-form';
-import ReactSignatureCanvas from 'react-signature-canvas';
+import html2canvas from 'html2canvas';
 import SignatureCanvas from 'react-signature-canvas';
-import { toBlob } from 'html-to-image';
 
 import DatePicker from 'react-date-picker';
 import 'react-date-picker/dist/DatePicker.css';
@@ -73,10 +72,10 @@ export default function WaiverForm() {
 
   const [formBeingSubmitted, setFormBeingSubmitted] = useState(false);
 
-  const [initial1SigPad, setInitial1SigPad] = useState<ReactSignatureCanvas>();
-  const [initial2SigPad, setInitial2SigPad] = useState<ReactSignatureCanvas>();
+  const [initial1SigPad, setInitial1SigPad] = useState<SignatureCanvas>();
+  const [initial2SigPad, setInitial2SigPad] = useState<SignatureCanvas>();
   const [primarySignatureSigPad, setPrimarySignatureSigPad] =
-    useState<ReactSignatureCanvas>();
+    useState<SignatureCanvas>();
 
   const requiredInputClass = (input: string) =>
     // @ts-expect-error
@@ -97,9 +96,35 @@ export default function WaiverForm() {
 
     // prep the forms html for screenshot
     if (waiverRef?.current) {
-      toBlob(waiverRef.current).then(function (blob) {
-        if (!blob) return;
-        handleUploadWaiverImage(blob, getValues());
+      // remove shadow for screenshot
+      (waiverRef.current as any).classList.remove('shadow-xl');
+      html2canvas(waiverRef.current).then((canvas) => {
+        const croppedCanvas = document.createElement('canvas');
+        const croppedCanvasContext = croppedCanvas.getContext(
+          '2d'
+        ) as CanvasRenderingContext2D;
+        // init data
+        const cropPositionTop = 0;
+        const cropPositionLeft = 0;
+        const cropWidth = canvas.width;
+        const cropHeight = canvas.height;
+
+        croppedCanvas.width = cropWidth;
+        croppedCanvas.height = cropHeight;
+
+        croppedCanvasContext.drawImage(
+          canvas,
+          cropPositionLeft,
+          cropPositionTop
+        );
+
+        croppedCanvas.toBlob((blob) => {
+          if (!blob) return;
+          handleUploadWaiverImage(blob, getValues());
+
+          // add shadow back after screenshot
+          (waiverRef?.current as any).classList.add('shadow-xl');
+        });
       });
     }
   };

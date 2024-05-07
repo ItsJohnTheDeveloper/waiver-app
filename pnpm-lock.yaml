@@ -14,9 +14,6 @@ dependencies:
   '@tremor/react':
     specifier: ^3.0.1
     version: 3.0.1(prop-types@15.8.1)(react-dom@18.2.0)(react@18.2.0)(tailwindcss@3.3.2)
-  '@types/js-cookie':
-    specifier: ^3.0.3
-    version: 3.0.3
   '@types/node':
     specifier: 20.3.0
     version: 20.3.0
@@ -62,9 +59,6 @@ dependencies:
   js-cookie:
     specifier: ^3.0.5
     version: 3.0.5
-  js-file-download:
-    specifier: ^0.4.12
-    version: 0.4.12
   next:
     specifier: 13.5.6
     version: 13.5.6(react-dom@18.2.0)(react@18.2.0)
@@ -110,6 +104,11 @@ dependencies:
   typescript:
     specifier: 5.2.0-dev.20230619
     version: 5.2.0-dev.20230619
+
+devDependencies:
+  js-file-download:
+    specifier: ^0.4.12
+    version: 0.4.12
 
 packages:
 
@@ -763,10 +762,6 @@ packages:
     resolution: {integrity: sha512-wLEm0QvaoawEDoTRwzTXp4b4jpwiJDvR5KMnFnVodm3scufTlBOWRD6N1OBf9TZMhjlNsSfcO5V+7AF4+Vy+9g==}
     dependencies:
       '@types/unist': 2.0.6
-    dev: false
-
-  /@types/js-cookie@3.0.3:
-    resolution: {integrity: sha512-Xe7IImK09HP1sv2M/aI+48a20VX+TdRJucfq4vfRVy6nWN8PYPOEnlMRSgxJAgYQIXJVL8dZ4/ilAM7dWNaOww==}
     dev: false
 
   /@types/json5@0.0.29:
@@ -2660,7 +2655,7 @@ packages:
 
   /js-file-download@0.4.12:
     resolution: {integrity: sha512-rML+NkoD08p5Dllpjo0ffy4jRHeY6Zsapvr/W86N7E0yuzAO6qa5X9+xog6zQNlH102J7IXljNY2FtS6Lj3ucg==}
-    dev: false
+    dev: true
 
   /js-tokens@4.0.0:
     resolution: {integrity: sha512-RdJUflcE3cUzKiMqQgsCu06FPu9UdIJO0beYbPhHN4k6apgJtifcoCtT9bcxOpYBtpD2kCM6Sbzg4CausW/PKQ==}
